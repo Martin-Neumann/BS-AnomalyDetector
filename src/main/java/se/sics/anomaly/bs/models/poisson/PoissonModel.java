@@ -1,77 +1,50 @@
-package se.sics.anomaly.bs.poission;
+package se.sics.anomaly.bs.models.poisson;
 
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-import se.sics.anomaly.bs.Gamma;
-
-import java.io.Serializable;
+import org.apache.flink.api.common.typeinfo.TypeHint;
+import org.apache.flink.api.common.typeinfo.TypeInformation;
+import se.sics.anomaly.bs.core.Anomaly;
+import se.sics.anomaly.bs.core.Gamma;
+import se.sics.anomaly.bs.history.History;
+import se.sics.anomaly.bs.models.Model;
 
 /**
- * Created by martin on 2015-11-05.
+ * Created by mneumann on 2016-04-21.
  */
-public class PoissonMicroModel implements Serializable{
+public class PoissonModel extends Model<PoissonValue> {
     private static final double prior_c = 0.0;
-    private double count;
-    private double size;
-    private double maxHistorySize;
+    private History<PoissonValue> hist;
 
-    PoissonMicroModel(double elementCount, double historySize, double maxHistorySize){
-        this.count = elementCount;
-        this.size = historySize;
-        this.maxHistorySize = maxHistorySize;
+    public PoissonModel(History<PoissonValue> hist){
+        this.hist = hist;
     }
 
-    PoissonMicroModel(double maxHistorySize){
-        this(0,0,maxHistorySize);
-    }
-
-    public double calculateAnomaly(double elementCount, double windowSize){
-        return calculateAnomaly(elementCount,windowSize,count,size);
-    }
-
-    public void addWindow(double elementCount, double windowSize){
-        if(size+windowSize > maxHistorySize){
-            double factor = ((maxHistorySize-windowSize)/size);
-            this.count = count*factor;
-            this.size = size*factor;
-        }
-        this.count += elementCount;
-        this.size += windowSize;
-    }
-
-    public void removeWindow(double elementCount, double windowSize){
-        this.count -= elementCount;
-        this.size -= windowSize;
-    }
-
-    public void resetModel(){
-        this.count = 0;
-        this.size = 0;
-    }
-
-    public boolean isHistoryFull(){
-        return size >= maxHistorySize;
-    }
-
-    @Override
-    public String toString() {
-        return "PoissonMicroModel{" +
-                "count=" + count +
-                ", size=" + size +
-                ", maxHistory"+ maxHistorySize +
-                '}';
-    }
-
-    static double calculateAnomaly(double value, double windowSize, double modelValue, double modelSize)
-    {
+    static double calculateAnomaly(double value, double windowSize, double modelValue, double modelSize) {
         // For now everything is calculated as poisson.
-        if ((value == 0.0 && windowSize == 0.0) || modelSize == 0.0)
+        if ((value == 0.0 && windowSize == 0.0) || modelSize == 0.0){
             return 0.0;
-        else {
+        } else {
             double result = principal_anomaly_poisson(value, windowSize, modelValue, modelSize);
             return (result > 0.0 ? result > 1.0 ? 0.0 : -Math.log(result) : 700.0);
         }
     }
-
 
     // The principal anomaly for a poisson distribution
     public static double principal_anomaly_poisson(double value, double windowLength, double modelCount, double modelSize) {
@@ -116,4 +89,24 @@ public class PoissonMicroModel implements Serializable{
         last[0] = y - delta;
         return sum;
     }
+
+
+    @Override
+    public Anomaly calculateAnomaly(PoissonValue v) {
+        PoissonValue h = hist.getHistory();
+        double res = -1d;
+        if (h != null) res = calculateAnomaly(v.count,v.sum,h.count,h.sum);
+        return new Anomaly(res);
+    }
+
+    @Override
+    public void addWindow(PoissonValue v) {
+        hist.addWindow(v);
+    }
+
+    @Override
+    public TypeInformation getTypeInfo() {
+        return TypeInformation.of(new TypeHint<PoissonModel>() {});
+    }
+
 }
