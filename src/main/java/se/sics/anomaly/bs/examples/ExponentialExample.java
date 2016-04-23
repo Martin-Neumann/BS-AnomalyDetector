@@ -41,21 +41,21 @@ public class ExponentialExample {
         // set up the execution environment
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setStreamTimeCharacteristic(TimeCharacteristic.IngestionTime);
+        env.setParallelism(1);
 
         // generate stream
         DataStream<Tuple2<String,Double>> inStream = env.addSource(new ExpSource());
 
         // key by identifier and pre-process the window
-        KeyedStream<Tuple2<ExponentialValue,NullValue>, Tuple> kPreStream = inStream
+        KeyedStream<Tuple3<String,ExponentialValue,NullValue>, Tuple> kPreStream = inStream
                 .keyBy(0)
                 .timeWindow(Time.seconds(10))
-                .fold(new Tuple2<>(new ExponentialValue(), NullValue.getInstance()), new PreProcessFold())
+                .fold(new Tuple3<>("",new ExponentialValue(0d,0d), NullValue.getInstance()), new PreProcessFold())
                 .keyBy(0);
 
         // initialize model
         History<ExponentialValue> hist = new HistoryTrailing<ExponentialValue>(5);
-        AnomalyFlatMap<ExponentialModel,ExponentialValue,NullValue> afm = new AnomalyFlatMap<>(14d,new ExponentialModel(hist), false);
-
+        AnomalyFlatMap<String,ExponentialModel,ExponentialValue,NullValue> afm = new AnomalyFlatMap<>(14d,new ExponentialModel(hist), true);
 
         kPreStream.flatMap(afm).print();
 
@@ -66,7 +66,6 @@ public class ExponentialExample {
     private static class ExpSource implements SourceFunction<Tuple2<String,Double>> {
         private double lambda1 = 10d;
         private double lambda2 = 100d;
-        private volatile NormalDistribution nGarb = new NormalDistribution(100,2);
         private volatile Random rnd = new Random();
         private volatile boolean isRunning = true;
         private volatile boolean anomaly = false;
@@ -97,12 +96,13 @@ public class ExponentialExample {
         }
     }
 
-    private static class PreProcessFold implements FoldFunction<Tuple2<String,Double>,Tuple2<ExponentialValue, NullValue>> {
+    private static class PreProcessFold implements FoldFunction<Tuple2<String,Double>,Tuple3<String,ExponentialValue, NullValue>> {
         @Override
-        public Tuple2<ExponentialValue, NullValue> fold(Tuple2<ExponentialValue, NullValue> exponentialValue, Tuple2<String, Double> o) throws Exception {
-            exponentialValue.f0.count += 1;
-            exponentialValue.f0.sum += o.f1;
-            return exponentialValue;
+        public Tuple3<String,ExponentialValue, NullValue> fold(Tuple3<String,ExponentialValue, NullValue> out, Tuple2<String, Double> o) throws Exception {
+            out.f1.f0 += 1;
+            out.f1.f1 += o.f1;
+            if(out.f0.equalsIgnoreCase(""))out.f0 = o.f0;
+            return out;
         }
     }
 

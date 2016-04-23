@@ -90,12 +90,11 @@ public class ExponentialModel extends Model<ExponentialValue> {
         return sum;
     }
 
-
     @Override
     public Anomaly calculateAnomaly(ExponentialValue v) {
-        ExponentialValue h = hist.getHistory();
+        ExponentialValue h = this.hist.getHistory();
         double res = -1d;
-        if (h != null) res = calculateAnomaly(v.count,v.sum,h.count,h.sum);
+        if (h != null) res = calculateAnomaly(v.f0,v.f1,h.f0,h.f1);
         return new Anomaly(res);
     }
 
@@ -105,8 +104,6 @@ public class ExponentialModel extends Model<ExponentialValue> {
     }
 
     @Override
-    public TypeInformation getTypeInfo() {
-        return TypeInformation.of(new TypeHint<ExponentialModel>() {});
-    }
+    public TypeInformation getTypeInfo() {return TypeInformation.of(new TypeHint<ExponentialModel>() {});}
 
 }

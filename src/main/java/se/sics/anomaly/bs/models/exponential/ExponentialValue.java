@@ -19,22 +19,25 @@ package se.sics.anomaly.bs.models.exponential;
  */
 
 
+import org.apache.flink.api.java.tuple.Tuple2;
 import se.sics.anomaly.bs.models.ModelValue;
 
 /**
  * Created by mneumann on 2016-04-21.
  */
-public class ExponentialValue extends ModelValue {
-    public double count;
-    public double sum;
-
+public class ExponentialValue extends Tuple2<Double,Double> implements ModelValue {
     public ExponentialValue(){
-        this.count = 0;
-        this.sum = 0;
+        super(0d,0d);
     }
+
+    public ExponentialValue(double count, double sum){
+        super(count, sum);
+    }
+
     @Override
     public void add(ModelValue v) {
-        count += ((ExponentialValue)v).count;
-        sum += ((ExponentialValue)v).sum;
+        this.f0 += ((ExponentialValue)v).f0;
+        this.f1 += ((ExponentialValue)v).f1;
     }
 }
+

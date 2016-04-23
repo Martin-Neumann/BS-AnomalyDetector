@@ -59,7 +59,6 @@ public class HistoryTrailing<T extends ModelValue> extends History {
                 sumValue.add(val);
             }
         }
-
         currPos = wrapIndex(currPos+1);
 
         if(notReady) return null;

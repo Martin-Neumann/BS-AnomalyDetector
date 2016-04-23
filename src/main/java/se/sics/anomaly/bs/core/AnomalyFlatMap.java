@@ -22,13 +22,14 @@ import org.apache.flink.api.common.functions.RichFlatMapFunction;
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
 import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.util.Collector;
 import se.sics.anomaly.bs.models.Model;
 import se.sics.anomaly.bs.models.ModelValue;
 
 
-public class AnomalyFlatMap<M extends Model,V extends ModelValue, T> extends RichFlatMapFunction<Tuple2<V, T>, Tuple2<Anomaly,T>> {
+public class AnomalyFlatMap<K,M extends Model,V extends ModelValue, T> extends RichFlatMapFunction<Tuple3<K,V, T>, Tuple3<K,Anomaly,T>> {
     private transient ValueState<M> microModel;
     private final double threshold;
     private boolean updateIfAnomaly;
@@ -38,7 +39,6 @@ public class AnomalyFlatMap<M extends Model,V extends ModelValue, T> extends Ric
         this.threshold = threshold;
         this.updateIfAnomaly = updateIfAnomaly;
         this.initModel = model;
-
     }
 
     @Override
@@ -53,14 +53,14 @@ public class AnomalyFlatMap<M extends Model,V extends ModelValue, T> extends Ric
     }
 
     @Override
-    public void flatMap(Tuple2<V, T> sample, Collector<Tuple2<Anomaly, T>> collector) throws Exception {
+    public void flatMap(Tuple3<K,V, T> sample, Collector<Tuple3<K,Anomaly, T>> collector) throws Exception {
         M model = microModel.value();
-        Anomaly res  = model.calculateAnomaly(sample.f0);
+        Anomaly res  = model.calculateAnomaly(sample.f1);
 
         if ( res.getScore() <= threshold || updateIfAnomaly){
-            model.addWindow(sample.f0);
-            microModel.update(model);
+            model.addWindow(sample.f1);
         }
-        collector.collect(new Tuple2<>(res,sample.f1));
+        microModel.update(model);
+        collector.collect(new Tuple3<>(sample.f0,res,sample.f2));
     }
 }

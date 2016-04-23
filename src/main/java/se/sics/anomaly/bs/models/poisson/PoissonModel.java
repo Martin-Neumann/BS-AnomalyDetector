@@ -95,7 +95,7 @@ public class PoissonModel extends Model<PoissonValue> {
     public Anomaly calculateAnomaly(PoissonValue v) {
         PoissonValue h = hist.getHistory();
         double res = -1d;
-        if (h != null) res = calculateAnomaly(v.count,v.sum,h.count,h.sum);
+        if (h != null) res = calculateAnomaly(v.f0,v.f1,h.f0,h.f1);
         return new Anomaly(res);
     }
 

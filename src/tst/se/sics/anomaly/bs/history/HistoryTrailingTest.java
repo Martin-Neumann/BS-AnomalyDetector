@@ -19,6 +19,7 @@ package se.sics.anomaly.bs.history;
  */
 
 import org.junit.Test;
+import se.sics.anomaly.bs.models.exponential.ExponentialValue;
 
 import static org.junit.Assert.*;
 
@@ -29,11 +30,23 @@ public class HistoryTrailingTest {
 
     @Test
     public void testGetHistory() throws Exception {
+        HistoryTrailing<ExponentialValue> ht = new HistoryTrailing<>(3);
+        ExponentialValue ev;
 
-    }
+        ev = ht.getHistory();
+        assertNull(ev);
 
-    @Test
-    public void testAddWindow() throws Exception {
+        ht.addWindow(new ExponentialValue(1d,1d));
+        ev = ht.getHistory();
+        assertNull(ev);
 
+        ht.addWindow(new ExponentialValue(1d,1d));
+        ev = ht.getHistory();
+        assertNull(ev);
+
+        ht.addWindow(new ExponentialValue(1d,1d));
+        ev = ht.getHistory();
+        assertEquals(4,ev.f0,0);
+        assertEquals(4,ev.f1,0);
     }
 }

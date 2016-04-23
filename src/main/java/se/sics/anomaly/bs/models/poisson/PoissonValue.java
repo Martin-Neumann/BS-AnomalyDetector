@@ -19,22 +19,24 @@ package se.sics.anomaly.bs.models.poisson;
  */
 
 
+import org.apache.flink.api.java.tuple.Tuple2;
 import se.sics.anomaly.bs.models.ModelValue;
 
 /**
  * Created by mneumann on 2016-04-21.
  */
-public class PoissonValue extends ModelValue {
-    public double count;
-    public double sum;
+public class PoissonValue extends Tuple2<Double,Double> implements ModelValue {
 
     public PoissonValue(){
-        this.count = 0;
-        this.sum = 0;
+        super(0d,0d);
+    }
+
+    public PoissonValue(double count, double sum){
+        super(count, sum);
     }
     @Override
     public void add(ModelValue v) {
-        count += ((PoissonValue)v).count;
-        sum += ((PoissonValue)v).sum;
+        this.f0 += ((PoissonValue)v).f0;
+        this.f1 += ((PoissonValue)v).f1;
     }
 }

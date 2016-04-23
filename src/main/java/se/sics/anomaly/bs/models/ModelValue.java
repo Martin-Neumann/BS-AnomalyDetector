@@ -21,6 +21,6 @@ package se.sics.anomaly.bs.models;
 /**
  * Created by mneumann on 2016-04-21.
  */
-public abstract class ModelValue {
-    public abstract void add(ModelValue v);
+public interface ModelValue {
+    void add(ModelValue v);
 }
