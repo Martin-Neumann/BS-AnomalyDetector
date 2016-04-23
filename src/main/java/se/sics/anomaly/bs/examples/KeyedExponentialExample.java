@@ -24,10 +24,9 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
-import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.types.NullValue;
-import se.sics.anomaly.bs.core.AnomalyFlatMap;
+import se.sics.anomaly.bs.core.KeyedAnomalyFlatMap;
 import se.sics.anomaly.bs.history.History;
 import se.sics.anomaly.bs.history.HistoryTrailing;
 import se.sics.anomaly.bs.models.exponential.ExponentialModel;
@@ -35,7 +34,7 @@ import se.sics.anomaly.bs.models.exponential.ExponentialValue;
 
 import java.util.Random;
 
-public class ExponentialExample {
+public class KeyedExponentialExample {
     public static void main(String[] args) throws Exception {
 
         // set up the execution environment
@@ -55,7 +54,7 @@ public class ExponentialExample {
 
         // initialize model
         History<ExponentialValue> hist = new HistoryTrailing<ExponentialValue>(5);
-        AnomalyFlatMap<String,ExponentialModel,ExponentialValue,NullValue> afm = new AnomalyFlatMap<>(14d,new ExponentialModel(hist), true);
+        KeyedAnomalyFlatMap<String,ExponentialModel,ExponentialValue,NullValue> afm = new KeyedAnomalyFlatMap<>(14d,new ExponentialModel(hist), true);
 
         kPreStream.flatMap(afm).print();
 

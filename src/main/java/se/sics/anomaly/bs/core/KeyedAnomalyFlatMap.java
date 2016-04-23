@@ -29,13 +29,13 @@ import se.sics.anomaly.bs.models.Model;
 import se.sics.anomaly.bs.models.ModelValue;
 
 
-public class AnomalyFlatMap<K,M extends Model,V extends ModelValue, T> extends RichFlatMapFunction<Tuple3<K,V, T>, Tuple3<K,Anomaly,T>> {
+public class KeyedAnomalyFlatMap<K,M extends Model,V extends ModelValue, T> extends RichFlatMapFunction<Tuple3<K,V, T>, Tuple3<K,Anomaly,T>> {
     private transient ValueState<M> microModel;
     private final double threshold;
     private boolean updateIfAnomaly;
     private M initModel;
 
-    public AnomalyFlatMap(double threshold, M model, boolean updateIfAnomaly) {
+    public KeyedAnomalyFlatMap(double threshold, M model, boolean updateIfAnomaly) {
         this.threshold = threshold;
         this.updateIfAnomaly = updateIfAnomaly;
         this.initModel = model;
