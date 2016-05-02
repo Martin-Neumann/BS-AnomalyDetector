@@ -19,11 +19,7 @@ package se.sics.anomaly.bs.history;
  */
 
 
-
-import se.sics.anomaly.bs.models.ModelValue;
-import java.io.Serializable;
-
-public abstract class History<T extends ModelValue> implements Serializable {
-    public abstract T getHistory();
-    public abstract void addWindow(T v);
+public interface History{
+    HistoryValue getHistory();
+    void addWindow(HistoryValue v);
 }

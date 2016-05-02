@@ -19,16 +19,15 @@ package se.sics.anomaly.bs.history;
  */
 
 
-import se.sics.anomaly.bs.models.ModelValue;
 import java.util.ArrayList;
 
 /**
  * Created by mneumann on 2016-04-21.
  */
-public class HistoryTrailing<T extends ModelValue> extends History {
+public class HistoryTrailing implements History {
 
 
-    private ArrayList<T> rollingHistory;
+    private ArrayList<HistoryValue> rollingHistory;
 
     private int numSegment;
     private int currPos;
@@ -43,15 +42,15 @@ public class HistoryTrailing<T extends ModelValue> extends History {
     }
 
     @Override
-    public T getHistory(){
+    public HistoryValue getHistory(){
         boolean notReady = false;
 
-        T sumValue = rollingHistory.get(0);
+        HistoryValue sumValue = rollingHistory.get(0);
         if (sumValue == null){
             notReady = true;
         }else{
             for (int i = 1; i < rollingHistory.size(); i++){
-                T val = rollingHistory.get(i);
+                HistoryValue val = rollingHistory.get(i);
                 if (val == null){
                     notReady = true;
                     break;
@@ -66,9 +65,9 @@ public class HistoryTrailing<T extends ModelValue> extends History {
     }
 
     @Override
-    public void addWindow(ModelValue v){
+    public void addWindow(HistoryValue v){
         int pos = wrapIndex(currPos-1);
-        rollingHistory.set(pos,(T)v);
+        rollingHistory.set(pos,v);
     }
 
     private int wrapIndex(int i) {

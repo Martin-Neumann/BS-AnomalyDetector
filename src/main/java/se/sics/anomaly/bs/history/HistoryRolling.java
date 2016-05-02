@@ -18,13 +18,13 @@ package se.sics.anomaly.bs.history;
  * limitations under the License.
  */
 
-import se.sics.anomaly.bs.models.ModelValue;
+
 import java.util.ArrayList;
 
-public class HistoryRolling<T extends ModelValue> extends History {
+public class HistoryRolling implements History {
 
 
-    private ArrayList<T> rollingHistory;
+    private ArrayList<HistoryValue> rollingHistory;
 
     private int numSegment;
     private int shiftPos;
@@ -43,15 +43,15 @@ public class HistoryRolling<T extends ModelValue> extends History {
     }
 
     @Override
-    public T getHistory(){
+    public HistoryValue getHistory(){
         boolean notReady = false;
 
-        T sumValue = rollingHistory.get(wrapIndex(currPos + shiftPos));
+        HistoryValue sumValue = rollingHistory.get(wrapIndex(currPos + shiftPos));
         if (sumValue == null){
             notReady = true;
         }else{
             for (int i = currPos - shiftNeg; i < currPos + shiftPos; i++){
-                T val = rollingHistory.get(wrapIndex(i));
+                HistoryValue val = rollingHistory.get(wrapIndex(i));
                 if (val == null){
                     notReady = true;
                     break;
@@ -67,9 +67,9 @@ public class HistoryRolling<T extends ModelValue> extends History {
     }
 
     @Override
-    public void addWindow(ModelValue v){
+    public void addWindow(HistoryValue v){
         int pos = wrapIndex(currPos-1);
-        rollingHistory.set(pos,(T)v);
+        rollingHistory.set(pos,v);
     }
 
     private int wrapIndex(int i) {

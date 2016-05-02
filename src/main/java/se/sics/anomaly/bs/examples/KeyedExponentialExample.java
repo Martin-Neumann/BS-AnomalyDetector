@@ -17,20 +17,18 @@ package se.sics.anomaly.bs.examples;
  * limitations under the License.
  */
 
-import org.apache.flink.api.common.functions.FoldFunction;
+import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.api.java.tuple.*;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
-import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.types.NullValue;
-import se.sics.anomaly.bs.core.KeyedAnomalyFlatMap;
+import se.sics.anomaly.bs.core.AnomalyResult;
+import se.sics.anomaly.bs.core.PayloadFold;
 import se.sics.anomaly.bs.history.History;
 import se.sics.anomaly.bs.history.HistoryTrailing;
-import se.sics.anomaly.bs.models.exponential.ExponentialModel;
-import se.sics.anomaly.bs.models.exponential.ExponentialValue;
 
 import java.util.Random;
 
@@ -45,21 +43,43 @@ public class KeyedExponentialExample {
         // generate stream
         DataStream<Tuple2<String,Double>> inStream = env.addSource(new ExpSource());
 
-        // key by identifier and pre-process the window
-        KeyedStream<Tuple3<String,ExponentialValue,NullValue>, Tuple> kPreStream = inStream
-                .keyBy(0)
-                .timeWindow(Time.seconds(10))
-                .fold(new Tuple3<>("",new ExponentialValue(0d,0d), NullValue.getInstance()), new PreProcessFold())
-                .keyBy(0);
+        // define history and create model
+        History hist = new HistoryTrailing(2);
+        StringExponentialValueAnomaly<Tuple2<String,Double>,NullValue> anomalyDetector = new StringExponentialValueAnomaly<>(hist);
 
-        // initialize model
-        History<ExponentialValue> hist = new HistoryTrailing<ExponentialValue>(5);
-        KeyedAnomalyFlatMap<String,ExponentialModel,ExponentialValue,NullValue> afm = new KeyedAnomalyFlatMap<>(14d,new ExponentialModel(hist), true);
+        // feed the stream though the model
+        DataStream<Tuple3<String,AnomalyResult,NullValue>> result = anomalyDetector.getAnomalySteam(inStream,new KExtract(),"",new VExtract(),new RVFold(),Time.seconds(10));
+        // print the result
+        result.print();
 
-        kPreStream.flatMap(afm).print();
+        env.execute("Simple Exponential Example Keyed");
 
-        env.execute("Simple Exponential Example");
+    }
 
+    private static class KExtract implements KeySelector<Tuple2<String,Double>,String>{
+        @Override
+        public String getKey(Tuple2<String, Double> t) throws Exception {
+            return t.f0;
+        }
+    }
+
+    private static class VExtract implements KeySelector<Tuple2<String,Double>,Double>{
+        @Override
+        public Double getKey(Tuple2<String, Double> t) throws Exception {
+            return t.f1;
+        }
+    }
+
+    private static class RVFold implements PayloadFold<Tuple2<String,Double>,NullValue>{
+        @Override
+        public NullValue fold(Tuple2<String, Double> in, NullValue out) {
+            return NullValue.getInstance();
+        }
+
+        @Override
+        public NullValue getInit() {
+            return NullValue.getInstance();
+        }
     }
 
     private static class ExpSource implements SourceFunction<Tuple2<String,Double>> {
@@ -94,16 +114,5 @@ public class KeyedExponentialExample {
             isRunning = false;
         }
     }
-
-    private static class PreProcessFold implements FoldFunction<Tuple2<String,Double>,Tuple3<String,ExponentialValue, NullValue>> {
-        @Override
-        public Tuple3<String,ExponentialValue, NullValue> fold(Tuple3<String,ExponentialValue, NullValue> out, Tuple2<String, Double> o) throws Exception {
-            out.f1.f0 += 1;
-            out.f1.f1 += o.f1;
-            if(out.f0.equalsIgnoreCase(""))out.f0 = o.f0;
-            return out;
-        }
-    }
-
 
 }

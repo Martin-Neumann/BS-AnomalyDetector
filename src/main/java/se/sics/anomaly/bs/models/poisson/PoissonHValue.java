@@ -1,4 +1,4 @@
-package se.sics.anomaly.bs.history;
+package se.sics.anomaly.bs.models.poisson;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -18,35 +18,26 @@ package se.sics.anomaly.bs.history;
  * limitations under the License.
  */
 
-import org.junit.Test;
-import se.sics.anomaly.bs.models.exponential.ExponentialValue;
 
-import static org.junit.Assert.*;
+import org.apache.flink.api.java.tuple.Tuple2;
+import se.sics.anomaly.bs.history.HistoryValue;
 
 /**
- * Created by mneumann on 2016-04-22.
+ * Created by mneumann on 2016-04-21.
  */
-public class HistoryTrailingTest {
+public class PoissonHValue extends Tuple2<Double,Double> implements HistoryValue {
 
-    @Test
-    public void testGetHistory() throws Exception {
-        HistoryTrailing<ExponentialValue> ht = new HistoryTrailing<>(3);
-        ExponentialValue ev;
+    public PoissonHValue(){
+        super(0d,0d);
+    }
 
-        ev = ht.getHistory();
-        assertNull(ev);
+    public PoissonHValue(double count, double sum){
+        super(count, sum);
+    }
 
-        ht.addWindow(new ExponentialValue(1d,1d));
-        ev = ht.getHistory();
-        assertNull(ev);
-
-        ht.addWindow(new ExponentialValue(1d,1d));
-        ev = ht.getHistory();
-        assertNull(ev);
-
-        ht.addWindow(new ExponentialValue(1d,1d));
-        ev = ht.getHistory();
-        assertEquals(4,ev.f0,0);
-        assertEquals(4,ev.f1,0);
+    @Override
+    public void add(HistoryValue v) {
+        this.f0 += ((PoissonHValue)v).f0;
+        this.f1 += ((PoissonHValue)v).f1;
     }
 }

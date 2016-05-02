@@ -19,18 +19,14 @@ package se.sics.anomaly.bs.models;
  */
 
 import org.apache.flink.api.common.typeinfo.TypeInformation;
-import se.sics.anomaly.bs.core.Anomaly;
-
-import java.io.Serializable;
+import org.apache.flink.api.java.tuple.Tuple2;
+import se.sics.anomaly.bs.core.AnomalyResult;
 
 /**
  * Created by mneumann on 2016-04-21.
  */
-public abstract class Model<T extends ModelValue> implements Serializable  {
-
-    public abstract Anomaly calculateAnomaly(T v);
-    public abstract void addWindow(T v);
+public abstract class Model {
+    public abstract AnomalyResult calculateAnomaly(Tuple2<Double,Double> v) ;
+    public abstract void addWindow(Tuple2<Double,Double> v);
     public abstract TypeInformation getTypeInfo();
-
-
 }

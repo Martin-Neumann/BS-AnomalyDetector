@@ -20,19 +20,22 @@ package se.sics.anomaly.bs.models.poisson;
 
 import org.apache.flink.api.common.typeinfo.TypeHint;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
-import se.sics.anomaly.bs.core.Anomaly;
+import org.apache.flink.api.java.tuple.Tuple2;
+import se.sics.anomaly.bs.core.AnomalyResult;
 import se.sics.anomaly.bs.core.Gamma;
 import se.sics.anomaly.bs.history.History;
 import se.sics.anomaly.bs.models.Model;
 
+import java.io.Serializable;
+
 /**
  * Created by mneumann on 2016-04-21.
  */
-public class PoissonModel extends Model<PoissonValue> {
+public class PoissonModel extends Model implements Serializable {
     private static final double prior_c = 0.0;
-    private History<PoissonValue> hist;
+    private History hist;
 
-    public PoissonModel(History<PoissonValue> hist){
+    public PoissonModel(History hist){
         this.hist = hist;
     }
 
@@ -92,16 +95,16 @@ public class PoissonModel extends Model<PoissonValue> {
 
 
     @Override
-    public Anomaly calculateAnomaly(PoissonValue v) {
-        PoissonValue h = hist.getHistory();
+    public AnomalyResult calculateAnomaly(Tuple2<Double,Double> v) {
+        PoissonHValue h = (PoissonHValue) hist.getHistory();
         double res = -1d;
         if (h != null) res = calculateAnomaly(v.f0,v.f1,h.f0,h.f1);
-        return new Anomaly(res);
+        return new AnomalyResult(res);
     }
 
     @Override
-    public void addWindow(PoissonValue v) {
-        hist.addWindow(v);
+    public void addWindow(Tuple2<Double,Double> v) {
+        hist.addWindow(new PoissonHValue(v.f0,v.f1));
     }
 
     @Override

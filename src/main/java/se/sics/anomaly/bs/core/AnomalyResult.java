@@ -1,4 +1,4 @@
-package se.sics.anomaly.bs.models;
+package se.sics.anomaly.bs.core;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -18,9 +18,17 @@ package se.sics.anomaly.bs.models;
  * limitations under the License.
  */
 
-/**
- * Created by mneumann on 2016-04-21.
- */
-public interface ModelValue {
-    void add(ModelValue v);
+public class AnomalyResult {
+    private double score;
+
+    public AnomalyResult(double score){
+        this.score=score;
+    }
+
+    public double getScore(){ return score; }
+
+    @Override
+    public String toString() {
+        return Double.toString(score);
+    }
 }
