@@ -29,6 +29,7 @@ import se.sics.anomaly.bs.core.AnomalyResult;
 import se.sics.anomaly.bs.core.PayloadFold;
 import se.sics.anomaly.bs.history.History;
 import se.sics.anomaly.bs.history.HistoryTrailing;
+import se.sics.anomaly.bs.models.exponential.ExponentialValueAnomaly;
 
 import java.util.Random;
 
@@ -45,7 +46,7 @@ public class KeyedExponentialExample {
 
         // define history and create model
         History hist = new HistoryTrailing(2);
-        StringExponentialValueAnomaly<Tuple2<String,Double>,NullValue> anomalyDetector = new StringExponentialValueAnomaly<>(hist);
+        ExponentialValueAnomaly<String,Tuple2<String,Double>,NullValue> anomalyDetector = new ExponentialValueAnomaly<String, Tuple2<String, Double>, NullValue>(hist);
 
         // feed the stream though the model
         DataStream<Tuple3<String,AnomalyResult,NullValue>> result = anomalyDetector.getAnomalySteam(inStream,new KExtract(),"",new VExtract(),new RVFold(),Time.seconds(10));
