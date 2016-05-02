@@ -19,7 +19,9 @@ package se.sics.anomaly.bs.history;
  */
 
 
-public interface History{
+import java.io.Serializable;
+
+public interface History extends Serializable{
     HistoryValue getHistory();
     void addWindow(HistoryValue v);
 }

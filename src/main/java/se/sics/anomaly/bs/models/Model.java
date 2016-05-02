@@ -22,10 +22,12 @@ import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.tuple.Tuple2;
 import se.sics.anomaly.bs.core.AnomalyResult;
 
+import java.io.Serializable;
+
 /**
  * Created by mneumann on 2016-04-21.
  */
-public abstract class Model {
+public abstract class Model implements Serializable {
     public abstract AnomalyResult calculateAnomaly(Tuple2<Double,Double> v) ;
     public abstract void addWindow(Tuple2<Double,Double> v);
     public abstract TypeInformation getTypeInfo();

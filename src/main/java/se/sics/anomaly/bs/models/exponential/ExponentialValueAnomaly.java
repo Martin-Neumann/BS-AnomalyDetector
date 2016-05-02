@@ -1,9 +1,13 @@
 package se.sics.anomaly.bs.models.exponential;
 
+import org.apache.flink.api.common.typeinfo.BasicTypeInfo;
+import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple3;
+import org.apache.flink.api.java.typeutils.TupleTypeInfo;
+import org.apache.flink.api.java.typeutils.TypeExtractor;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.windowing.time.Time;
@@ -26,15 +30,32 @@ public class ExponentialValueAnomaly<K,V,RV> {
     }
 
     public ExponentialValueAnomaly(History hist){
-        new ExponentialValueAnomaly(false,14d,hist);
+        this(false,14d,hist);
     }
 
-    public DataStream<Tuple3<K, AnomalyResult, RV>> getAnomalySteam(DataStream<V> ds, KeySelector<V, K> keySelector, K keyInit , KeySelector<V,Double> valueSelector, PayloadFold<V, RV> valueFold, Time window) {
-        KeyedStream<Tuple3<K,Tuple2<Double,Double>,RV>, Tuple> kPreStream = ds
-                .keyBy(keySelector)
+    public DataStream<Tuple3<K, AnomalyResult, RV>> getAnomalySteam(DataStream<V> ds, KeySelector<V, K> keySelector, KeySelector<V,Double> valueSelector, PayloadFold<V, RV> valueFold, Time window) {
+
+        KeyedStream<V, K> keyedInput = ds
+                .keyBy(keySelector);
+
+        TypeInformation<Object> foldResultType = TypeExtractor.getUnaryOperatorReturnType(valueFold,
+                PayloadFold.class,
+                false,
+                false,
+                ds.getType(),
+                "PayloadFold",
+                false);
+
+        TypeInformation<Tuple3<K,Tuple2<Double,Double>,RV>> resultType = (TypeInformation) new TupleTypeInfo<>(Tuple3.class,
+                new TypeInformation[] {keyedInput.getKeyType(), new TupleTypeInfo(Tuple2.class,
+                        BasicTypeInfo.DOUBLE_TYPE_INFO, BasicTypeInfo.DOUBLE_TYPE_INFO), foldResultType});
+
+        Tuple3<K,Tuple2<Double,Double>, RV> init= new Tuple3<>(null,new Tuple2<>(0d,0d), valueFold.getInit());
+        KeyedStream<Tuple3<K,Tuple2<Double,Double>,RV>, Tuple> kPreStream = keyedInput
                 .timeWindow(window)
-                .fold(new Tuple3<>(keyInit ,new Tuple2<Double,Double>(0d,0d), valueFold.getInit()), new CountSumFold<V,K,RV>(keySelector,valueSelector,valueFold))
+                .fold(init, new CountSumFold<>(keySelector,valueSelector,valueFold, resultType))
                 .keyBy(0);
+
         return kPreStream.flatMap(afm);
     }
 

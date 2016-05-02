@@ -49,7 +49,7 @@ public class KeyedExponentialExample {
         ExponentialValueAnomaly<String,Tuple2<String,Double>,NullValue> anomalyDetector = new ExponentialValueAnomaly<String, Tuple2<String, Double>, NullValue>(hist);
 
         // feed the stream though the model
-        DataStream<Tuple3<String,AnomalyResult,NullValue>> result = anomalyDetector.getAnomalySteam(inStream,new KExtract(),"",new VExtract(),new RVFold(),Time.seconds(10));
+        DataStream<Tuple3<String,AnomalyResult,NullValue>> result = anomalyDetector.getAnomalySteam(inStream,new KExtract(),new VExtract(),new RVFold(),Time.seconds(10));
         // print the result
         result.print();
 

@@ -27,8 +27,10 @@ import org.apache.flink.configuration.Configuration;
 import org.apache.flink.util.Collector;
 import se.sics.anomaly.bs.models.Model;
 
+import java.io.Serializable;
 
-public class KeyedAnomalyFlatMap<K,M extends Model, T> extends RichFlatMapFunction<Tuple3<K,Tuple2<Double,Double>, T>, Tuple3<K,AnomalyResult,T>> {
+
+public class KeyedAnomalyFlatMap<K,M extends Model, T> extends RichFlatMapFunction<Tuple3<K,Tuple2<Double,Double>, T>, Tuple3<K,AnomalyResult,T>>{
     private transient ValueState<M> microModel;
     private final double threshold;
     private boolean updateIfAnomaly;
