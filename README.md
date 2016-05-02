@@ -1,7 +1,9 @@
 # BS-AnomalyDetector
 
-| Date        | Notes  |
+| Date          | Notes         |
 | ------------- |:-------------:|
+| 02-05-2016    | Updated interface, hideing the preprocessing step.|
+| 23-04-2016    | Improved testcoverage, added Normal and Lognormal distributions.|
 | 14-04-2016    | Initial upload. The code is transfered from an internal repository and will be gradeually uploaded here.|
 
 BS-AnomalyDetector is a libary for [Apache Flink](https://flink.apache.org/) streaming. It provides the building blocks to create a distributed fault tolerant streaming anomaly detection pipeline in flink using Bayesian Statistical Anomaly.
