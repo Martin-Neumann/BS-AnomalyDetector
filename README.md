@@ -1,8 +1,10 @@
 # BS-AnomalyDetector
 
-| Date        | Notes  |
+| Date          | Notes         |
 | ------------- |:-------------:|
-| 14-04-2016    | Initial upload. The code is transfered from an internal repository and will be gradeually uploaded here.|
+| 02-05-2016    | Updated interface, hiding the preprocessing step.|
+| 23-04-2016    | Improved test coverage, added Normal and Lognormal distributions.|
+| 14-04-2016    | Initial upload. The code is transferred from an internal repository and will be gradually uploaded here.|
 
 BS-AnomalyDetector is a libary for [Apache Flink](https://flink.apache.org/) streaming. It provides the building blocks to create a distributed fault tolerant streaming anomaly detection pipeline in flink using Bayesian Statistical Anomaly.
 
@@ -14,17 +16,17 @@ BS-AnomalyDetector is a libary for [Apache Flink](https://flink.apache.org/) str
 
 Strength of the approach:
 
-1. Compact model: The only data stored e isare the defineing values for the distributions. This allows to keep a huge number of models in memory.
+1. Compact model: The only data stored are the defining values for the distribution. This allows to keep a huge number of models in memory.
 2. (Almost) no training time needed for the model: This approach compares current data to data seen before, it has a startup phase where it will fill the history. Otherwise no training phase is needed.
-3. No Golden truth needed: This is a statistical approach; assuming normal cases are more frequrent then abnormal cases. It does not require a Golden thruth dataset to set up.
+3. No Golden truth needed: This is a statistical approach; assuming normal cases are more frequent than abnormal cases. It does not require a Golden truth dataset to set up.
 
 Limitations of the approach:
 
-1. If the data must fit the choosen distribution to give good results
+1. If the data must fit the chosen distribution to give good results
 2. Anomalies might be missed if they "hide" in the window aggregation. If there are extremely high values and extremely low values in the same window they might even out to a normal value.
-3. The size of the window and history need to be choosen carefully and have a huge impact on the outcome.
+3. The size of the window and history need to be chosen carefully and have a huge impact on the outcome.
 
-## Use the libary
+## Use the library
 
 
 Work in progress
