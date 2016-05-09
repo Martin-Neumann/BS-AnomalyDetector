@@ -1,4 +1,4 @@
-package se.sics.anomaly.bs.models.poisson;
+package se.sics.anomaly.bs.models.normal;
 
 import org.apache.flink.api.common.typeinfo.BasicTypeInfo;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
@@ -16,23 +16,23 @@ import se.sics.anomaly.bs.core.KeyedAnomalyFlatMap;
 import se.sics.anomaly.bs.core.PayloadFold;
 import se.sics.anomaly.bs.history.History;
 import se.sics.anomaly.bs.models.CountSumFold;
+import se.sics.anomaly.bs.models.CountWindFold;
 
 /**
  * Created by mneumann on 2016-04-27.
  */
-public class PoissonValueAnomaly<K,V,RV> {
+public class NormalFreqAnomaly<K,V,RV> {
+    private KeyedAnomalyFlatMap<K,NormalModel,RV> afm;
 
-    private KeyedAnomalyFlatMap<K,PoissonModel,RV> afm;
-
-    public PoissonValueAnomaly(boolean addIfAnomaly, double anomalyLevel, History hist){
-        this.afm = new KeyedAnomalyFlatMap<>(14d,new PoissonModel(hist), true);
+    public NormalFreqAnomaly(boolean addIfAnomaly, double anomalyLevel, History hist){
+        this.afm = new KeyedAnomalyFlatMap<>(14d,new NormalModel(hist), true);
     }
 
-    public PoissonValueAnomaly(History hist){
-        new PoissonFreqAnomaly(false,14d,hist);
+    public NormalFreqAnomaly(History hist){
+        new NormalFreqAnomaly(false,14d,hist);
     }
 
-    public DataStream<Tuple3<K, AnomalyResult, RV>> getAnomalySteam(DataStream<V> ds, KeySelector<V, K> keySelector, KeySelector<V,Double> valueSelector, PayloadFold<V, RV> valueFold, Time window) {
+    public DataStream<Tuple3<K, AnomalyResult, RV>> getAnomalySteam(DataStream<V> ds, KeySelector<V, K> keySelector , KeySelector<V,Double> valueSelector, PayloadFold<V, RV> valueFold, Time window) {
 
         KeyedStream<V, K> keyedInput = ds
                 .keyBy(keySelector);
@@ -52,7 +52,7 @@ public class PoissonValueAnomaly<K,V,RV> {
         Tuple3<K,Tuple2<Double,Double>, RV> init= new Tuple3<>(null,new Tuple2<>(0d,0d), valueFold.getInit());
         KeyedStream<Tuple3<K,Tuple2<Double,Double>,RV>, Tuple> kPreStream = keyedInput
                 .timeWindow(window)
-                .fold(init, new CountSumFold<>(keySelector,valueSelector,valueFold, resultType))
+                .fold(init, new CountWindFold<>(keySelector,valueFold, window, resultType))
                 .keyBy(0);
 
         return kPreStream.flatMap(afm);

@@ -58,7 +58,4 @@ public class ExponentialValueAnomaly<K,V,RV> {
 
         return kPreStream.flatMap(afm);
     }
-
-
-
 }

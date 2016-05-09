@@ -31,7 +31,7 @@ public class NormalValueAnomaly<K,V,RV> {
         new NormalValueAnomaly(false,14d,hist);
     }
 
-    public DataStream<Tuple3<K, AnomalyResult, RV>> getAnomalySteam(DataStream<V> ds, KeySelector<V, K> keySelector, K keyInit , KeySelector<V,Double> valueSelector, PayloadFold<V, RV> valueFold, Time window) {
+    public DataStream<Tuple3<K, AnomalyResult, RV>> getAnomalySteam(DataStream<V> ds, KeySelector<V, K> keySelector , KeySelector<V,Double> valueSelector, PayloadFold<V, RV> valueFold, Time window) {
 
         KeyedStream<V, K> keyedInput = ds
                 .keyBy(keySelector);
@@ -48,9 +48,10 @@ public class NormalValueAnomaly<K,V,RV> {
                 new TypeInformation[] {keyedInput.getKeyType(), new TupleTypeInfo(Tuple2.class,
                         BasicTypeInfo.DOUBLE_TYPE_INFO, BasicTypeInfo.DOUBLE_TYPE_INFO), foldResultType});
 
+        Tuple3<K,Tuple2<Double,Double>, RV> init= new Tuple3<>(null,new Tuple2<>(0d,0d), valueFold.getInit());
         KeyedStream<Tuple3<K,Tuple2<Double,Double>,RV>, Tuple> kPreStream = keyedInput
                 .timeWindow(window)
-                .fold(new Tuple3<>(keyInit ,new Tuple2<>(0d,0d), valueFold.getInit()), new CountSumFold<>(keySelector,valueSelector,valueFold, resultType))
+                .fold(init, new CountSumFold<>(keySelector,valueSelector,valueFold, resultType))
                 .keyBy(0);
 
         return kPreStream.flatMap(afm);

@@ -39,17 +39,18 @@ public class KeyedExponentialExample {
         // set up the execution environment
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setStreamTimeCharacteristic(TimeCharacteristic.IngestionTime);
-        env.setParallelism(1);
 
         // generate stream
-        DataStream<Tuple2<String,Double>> inStream = env.addSource(new ExpSource());
+        DataStream<Tuple2<String,Double>> inStream = env.addSource(new ExponentialGenerator());
 
-        // define history and create model
+        // Choose and a History defining what the latest window will be compared to. In this case each new window will be compared to the aggregation of the last two windows.
         History hist = new HistoryTrailing(2);
+        // Choose a distribution the value is supposed to follow and initialize it with a history.
         ExponentialValueAnomaly<String,Tuple2<String,Double>,NullValue> anomalyDetector = new ExponentialValueAnomaly<String, Tuple2<String, Double>, NullValue>(hist);
 
-        // feed the stream though the model
+        // feed the stream into the model and get back a stream of AnomalyResults. For details see the different internal classes defined below.
         DataStream<Tuple3<String,AnomalyResult,NullValue>> result = anomalyDetector.getAnomalySteam(inStream,new KExtract(),new VExtract(),new RVFold(),Time.seconds(10));
+
         // print the result
         result.print();
 
@@ -57,6 +58,7 @@ public class KeyedExponentialExample {
 
     }
 
+    // Simple extractor function that pulls the key out of the input pojo
     private static class KExtract implements KeySelector<Tuple2<String,Double>,String>{
         @Override
         public String getKey(Tuple2<String, Double> t) throws Exception {
@@ -64,6 +66,7 @@ public class KeyedExponentialExample {
         }
     }
 
+    // Simple extractor function that pulls the value out of the input pojo. For frequency based anomaly detection this is not needed.
     private static class VExtract implements KeySelector<Tuple2<String,Double>,Double>{
         @Override
         public Double getKey(Tuple2<String, Double> t) throws Exception {
@@ -71,6 +74,7 @@ public class KeyedExponentialExample {
         }
     }
 
+    // User defined fold function. Use this to enrich the return from the model with metadata e.g. start and end timestamp.
     private static class RVFold implements PayloadFold<Tuple2<String,Double>,NullValue>{
         @Override
         public NullValue fold(Tuple2<String, Double> in, NullValue out) {
@@ -83,37 +87,6 @@ public class KeyedExponentialExample {
         }
     }
 
-    private static class ExpSource implements SourceFunction<Tuple2<String,Double>> {
-        private double lambda1 = 10d;
-        private double lambda2 = 100d;
-        private volatile Random rnd = new Random();
-        private volatile boolean isRunning = true;
-        private volatile boolean anomaly = false;
 
-        public double getNext(double lambda) {
-            return  Math.log(1-rnd.nextDouble())/(-lambda);
-        }
-
-        @Override
-        public void run(SourceContext<Tuple2<String, Double>> sourceContext) throws Exception {
-            while(isRunning){
-                Thread.sleep(1000);
-                if(!anomaly){
-                    sourceContext.collect(new Tuple2<>("key1", getNext(lambda1)));
-                    sourceContext.collect(new Tuple2<>("key2", getNext(lambda1)));
-                    if(rnd.nextInt(40)<1)anomaly = true;
-                }else{
-                    sourceContext.collect(new Tuple2<>("key1", getNext(lambda2)));
-                    sourceContext.collect(new Tuple2<>("key2", getNext(lambda2)));
-                    if(rnd.nextInt(10)<1)anomaly = false;
-                }
-            }
-        }
-
-        @Override
-        public void cancel() {
-            isRunning = false;
-        }
-    }
 
 }
