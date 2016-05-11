@@ -27,19 +27,26 @@ public class HistoryRolling implements History {
     private ArrayList<HistoryValue> rollingHistory;
 
     private int numSegment;
+    private int totSegment;
     private int shiftPos;
     private int shiftNeg;
     private int currPos;
+    private int rep;
 
-    public HistoryRolling(int numSegment, int shiftPos, int shiftNeg){
+    public HistoryRolling(int numSegment, int shiftPos, int shiftNeg,int rep){
         this.numSegment = numSegment;
-        this.rollingHistory = new ArrayList<>(numSegment);
+        this.rollingHistory = new ArrayList<>(numSegment*rep);
         this.shiftNeg = shiftNeg;
         this.shiftPos = shiftPos;
         this.currPos = 0;
-        for( int i = 0; i<numSegment; i++){
+        this.rep = rep;
+        this.totSegment = rep * numSegment;
+        for( int i = 0; i<totSegment; i++){
             rollingHistory.add(null);
         }
+    }
+    public HistoryRolling(int numSegment, int shiftPos, int shiftNeg){
+        new HistoryRolling(numSegment,shiftPos,shiftNeg,1);
     }
 
     @Override
@@ -50,18 +57,19 @@ public class HistoryRolling implements History {
         if (sumValue == null){
             notReady = true;
         }else{
-            for (int i = currPos - shiftNeg; i < currPos + shiftPos; i++){
-                HistoryValue val = rollingHistory.get(wrapIndex(i));
-                if (val == null){
-                    notReady = true;
-                    break;
+            sumValue=sumValue.getEmpty();
+            for( int os = 0; os<rep ; os++){
+                for (int i = (currPos - shiftNeg)-os*numSegment; i <= (currPos + shiftPos)-os*numSegment; i++){
+                    HistoryValue val = rollingHistory.get(wrapIndex(i));
+                    if (val == null){
+                        notReady = true;
+                        break;
+                    }
+                    sumValue.add(val);
                 }
-                sumValue.add(val);
             }
         }
-
         currPos = wrapIndex(currPos+1);
-
         if(notReady) return null;
         return sumValue;
     }
@@ -73,9 +81,9 @@ public class HistoryRolling implements History {
     }
 
     private int wrapIndex(int i) {
-        int res = i % numSegment;
+        int res = i % totSegment;
         if (res < 0) { // java modulus can be negative
-            res += numSegment;
+            res += totSegment;
         }
         return res;
     }

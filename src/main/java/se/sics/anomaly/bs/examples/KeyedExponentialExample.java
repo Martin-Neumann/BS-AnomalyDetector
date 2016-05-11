@@ -28,6 +28,7 @@ import org.apache.flink.types.NullValue;
 import se.sics.anomaly.bs.core.AnomalyResult;
 import se.sics.anomaly.bs.core.PayloadFold;
 import se.sics.anomaly.bs.history.History;
+import se.sics.anomaly.bs.history.HistoryRolling;
 import se.sics.anomaly.bs.history.HistoryTrailing;
 import se.sics.anomaly.bs.models.exponential.ExponentialValueAnomaly;
 

@@ -104,7 +104,10 @@ public class PoissonModel extends Model implements Serializable {
 
     @Override
     public void addWindow(Tuple2<Double,Double> v) {
-        hist.addWindow(new PoissonHValue(v.f0,v.f1));
+        PoissonHValue val = new PoissonHValue();
+        val.f0 = v.f0;
+        val.f1 = v.f1;
+        hist.addWindow(val);
     }
 
     @Override

@@ -28,16 +28,17 @@ import se.sics.anomaly.bs.history.HistoryValue;
 public class PoissonHValue extends Tuple2<Double,Double> implements HistoryValue {
 
     public PoissonHValue(){
-        super(0d,0d);
-    }
-
-    public PoissonHValue(double count, double sum){
-        super(count, sum);
+        super(0d, 0d);
     }
 
     @Override
     public void add(HistoryValue v) {
         this.f0 += ((PoissonHValue)v).f0;
         this.f1 += ((PoissonHValue)v).f1;
+    }
+
+    @Override
+    public HistoryValue getEmpty() {
+        return new PoissonHValue();
     }
 }

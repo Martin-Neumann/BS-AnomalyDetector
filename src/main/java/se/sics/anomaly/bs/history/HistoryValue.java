@@ -7,4 +7,5 @@ package se.sics.anomaly.bs.history;
 
 public interface HistoryValue {
     void add(HistoryValue v);
+    HistoryValue getEmpty();
 }

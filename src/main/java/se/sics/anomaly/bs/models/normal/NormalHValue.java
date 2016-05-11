@@ -7,13 +7,9 @@ import se.sics.anomaly.bs.history.HistoryValue;
  * Created by mneumann on 2016-04-28.
  */
 public class NormalHValue extends Tuple4<Double,Double,Double,Double> implements HistoryValue {
-
-    /*
-    private double size;
-    private double sums;
-    private double sumsx;
-    private double sumsxx;
-     */
+    public NormalHValue(){
+        super(0d, 0d,0d,0d);
+    }
 
     @Override
     public void add(HistoryValue v) {
@@ -22,4 +18,10 @@ public class NormalHValue extends Tuple4<Double,Double,Double,Double> implements
         this.f2 +=((NormalHValue)v).f2;
         this.f3 +=((NormalHValue)v).f3;
     }
+
+    @Override
+    public HistoryValue getEmpty() {
+        return new NormalHValue();
+    }
+
 }
