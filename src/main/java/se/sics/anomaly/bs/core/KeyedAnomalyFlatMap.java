@@ -47,7 +47,7 @@ public class KeyedAnomalyFlatMap<K,M extends Model, T> extends RichFlatMapFuncti
     public void open(Configuration parameters) throws Exception {
         ValueStateDescriptor<M> descriptor =
                 new ValueStateDescriptor<>(
-                        "RollingMicroModel",
+                        "MicroModel",
                         initModel.getTypeInfo(),
                         initModel
                         );

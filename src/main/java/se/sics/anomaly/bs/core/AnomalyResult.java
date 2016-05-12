@@ -37,6 +37,6 @@ public class AnomalyResult {
 
     @Override
     public String toString() {
-        return Double.toString(score);
+        return (Double.toString(score) + " "+ Long.toString(getStartTime())+ " "+ Long.toString(getEndTime()));
     }
 }

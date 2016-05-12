@@ -97,7 +97,9 @@ public class PoissonModel extends Model implements Serializable {
     @Override
     public AnomalyResult calculateAnomaly(Tuple4<Double,Double,Long,Long> v) {
         PoissonHValue h = (PoissonHValue) hist.getHistory();
-        if (h == null) return null;
+        if (h == null){
+            return new AnomalyResult(-1,v.f2,v.f3);
+        }
         return new AnomalyResult(calculateAnomaly(v.f0,v.f1,h.f0,h.f1),v.f2,v.f3);
     }
 
