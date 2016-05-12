@@ -47,18 +47,14 @@ public class NormalFreqAnomaly<K,V,RV> {
                 "PayloadFold",
                 false);
 
-        TypeInformation<Tuple3<K,Tuple2<Double,Double>,RV>> resultType = (TypeInformation) new TupleTypeInfo<>(Tuple3.class,
-                new TypeInformation[] {keyedInput.getKeyType(), new TupleTypeInfo(Tuple2.class,
-                        BasicTypeInfo.DOUBLE_TYPE_INFO, BasicTypeInfo.DOUBLE_TYPE_INFO), foldResultType});
-
-        TypeInformation<Tuple3<K,Tuple4<Double,Double,Long,Long>,RV>> timeResultType = (TypeInformation) new TupleTypeInfo<>(Tuple3.class,
+         TypeInformation<Tuple3<K,Tuple4<Double,Double,Long,Long>,RV>> resultType = (TypeInformation) new TupleTypeInfo<>(Tuple3.class,
                 new TypeInformation[] {keyedInput.getKeyType(), new TupleTypeInfo(Tuple4.class,
                         BasicTypeInfo.DOUBLE_TYPE_INFO, BasicTypeInfo.DOUBLE_TYPE_INFO, BasicTypeInfo.LONG_TYPE_INFO,BasicTypeInfo.LONG_TYPE_INFO), foldResultType});
 
-        Tuple3<K,Tuple2<Double,Double>, RV> init= new Tuple3<>(null,new Tuple2<>(0d,0d), valueFold.getInit());
+        Tuple3<K,Tuple4<Double,Double,Long,Long>, RV> init= new Tuple3<>(null,new Tuple4<>(0d,0d,0l,0l), valueFold.getInit());
         KeyedStream<Tuple3<K,Tuple4<Double,Double,Long,Long>,RV>, Tuple> kPreStream = keyedInput
                 .timeWindow(window)
-                .apply(init, new CountWindFold<>(keySelector,valueFold, window, resultType),new WindowTimeExtractor(timeResultType))
+                .apply(init, new CountWindFold<>(keySelector,valueFold, window, resultType),new WindowTimeExtractor(resultType))
                 .keyBy(0);
 
         return kPreStream.flatMap(afm);

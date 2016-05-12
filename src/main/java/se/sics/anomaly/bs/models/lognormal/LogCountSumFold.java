@@ -5,17 +5,18 @@ import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple3;
+import org.apache.flink.api.java.tuple.Tuple4;
 import org.apache.flink.api.java.typeutils.ResultTypeQueryable;
 import se.sics.anomaly.bs.core.PayloadFold;
 
-public class LogCountSumFold<V,K,RV> implements FoldFunction<V, Tuple3<K,Tuple2<Double,Double>, RV>>, ResultTypeQueryable<Tuple3<K,Tuple2<Double,Double>, RV>> {
+public class LogCountSumFold<V,K,RV> implements FoldFunction<V, Tuple3<K,Tuple4<Double,Double,Long,Long>, RV>>, ResultTypeQueryable<Tuple3<K,Tuple4<Double,Double,Long,Long>, RV>> {
         private PayloadFold<V,RV> plf;
         private KeySelector<V,K> kSelect;
         private KeySelector<V,Double> vSelect;
 
-        private transient TypeInformation<Tuple3<K,Tuple2<Double,Double>, RV>> resultType;
+        private transient TypeInformation<Tuple3<K,Tuple4<Double,Double,Long,Long>, RV>> resultType;
 
-        public LogCountSumFold(KeySelector<V, K> key, KeySelector<V,Double> value, PayloadFold<V, RV> valueFold, TypeInformation<Tuple3<K, Tuple2<Double, Double>, RV>> resultType){
+        public LogCountSumFold(KeySelector<V, K> key, KeySelector<V,Double> value, PayloadFold<V, RV> valueFold, TypeInformation<Tuple3<K, Tuple4<Double,Double,Long,Long>, RV>> resultType){
             this.plf = valueFold;
             this.kSelect = key;
             this.vSelect = value;
@@ -23,12 +24,12 @@ public class LogCountSumFold<V,K,RV> implements FoldFunction<V, Tuple3<K,Tuple2<
         }
 
         @Override
-        public TypeInformation<Tuple3<K,Tuple2<Double,Double>, RV>> getProducedType() {
+        public TypeInformation<Tuple3<K,Tuple4<Double,Double,Long,Long>, RV>> getProducedType() {
             return resultType;
         }
 
         @Override
-        public Tuple3<K, Tuple2<Double,Double>, RV> fold(Tuple3<K, Tuple2<Double,Double>, RV> out, V value) throws Exception {
+        public Tuple3<K, Tuple4<Double,Double,Long,Long>, RV> fold(Tuple3<K, Tuple4<Double,Double,Long,Long>, RV> out, V value) throws Exception {
 
             if (out.f0 == null){
                 out.f0=kSelect.getKey(value);
