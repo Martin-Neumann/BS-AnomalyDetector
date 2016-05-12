@@ -21,6 +21,7 @@ package se.sics.anomaly.bs.models.poisson;
 import org.apache.flink.api.common.typeinfo.TypeHint;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.api.java.tuple.Tuple4;
 import se.sics.anomaly.bs.core.AnomalyResult;
 import se.sics.anomaly.bs.core.Gamma;
 import se.sics.anomaly.bs.history.History;
@@ -93,17 +94,15 @@ public class PoissonModel extends Model implements Serializable {
         return sum;
     }
 
-
     @Override
-    public AnomalyResult calculateAnomaly(Tuple2<Double,Double> v) {
+    public AnomalyResult calculateAnomaly(Tuple4<Double,Double,Long,Long> v) {
         PoissonHValue h = (PoissonHValue) hist.getHistory();
-        double res = -1d;
-        if (h != null) res = calculateAnomaly(v.f0,v.f1,h.f0,h.f1);
-        return new AnomalyResult(res);
+        if (h == null) return null;
+        return new AnomalyResult(calculateAnomaly(v.f0,v.f1,h.f0,h.f1),v.f2,v.f3);
     }
 
     @Override
-    public void addWindow(Tuple2<Double,Double> v) {
+    public void addWindow(Tuple4<Double,Double,Long,Long> v) {
         PoissonHValue val = new PoissonHValue();
         val.f0 = v.f0;
         val.f1 = v.f1;

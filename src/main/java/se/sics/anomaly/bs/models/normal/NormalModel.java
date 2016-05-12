@@ -3,6 +3,7 @@ package se.sics.anomaly.bs.models.normal;
 import org.apache.flink.api.common.typeinfo.TypeHint;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.api.java.tuple.Tuple4;
 import se.sics.anomaly.bs.core.AnomalyResult;
 import se.sics.anomaly.bs.core.Gamma;
 import se.sics.anomaly.bs.history.History;
@@ -89,19 +90,17 @@ public class NormalModel extends Model implements Serializable {
     }
 
     @Override
-    public AnomalyResult calculateAnomaly(Tuple2<Double,Double> v) {
-
+    public AnomalyResult calculateAnomaly(Tuple4<Double,Double,Long,Long> v) {
         NormalHValue h = (NormalHValue) hist.getHistory();
+        if (h == null) return null;
         double mean = h.f2/h.f1;
         double scale = h.f3-h.f2*h.f2/h.f1;
         double cc = h.f0 * 0.5;
-
-        AnomalyResult res = new AnomalyResult(calculateAnomaly(v.f0, cc, mean  , (h.f1+v.f1)/(h.f1*v.f1)*scale));
-        return res;
+        return new AnomalyResult(calculateAnomaly(v.f0, cc, mean  , (h.f1+v.f1)/(h.f1*v.f1)*scale),v.f2,v.f3);
     }
 
     @Override
-    public void addWindow(Tuple2<Double,Double> v) {
+    public void addWindow(Tuple4<Double,Double,Long,Long> v) {
         NormalHValue hValue =new NormalHValue();
         hValue.f0 = 1d;
         hValue.f1 = v.f1;

@@ -20,12 +20,20 @@ package se.sics.anomaly.bs.core;
 
 public class AnomalyResult {
     private double score;
+    private long sTime;
+    private long eTime;
 
-    public AnomalyResult(double score){
+
+    public AnomalyResult(double score, long sTime, long eTime){
         this.score=score;
+        this.sTime = sTime;
+        this.eTime = eTime;
     }
 
     public double getScore(){ return score; }
+
+    public long getStartTime(){return sTime;}
+    public long getEndTime(){return eTime;}
 
     @Override
     public String toString() {
