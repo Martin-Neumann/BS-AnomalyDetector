@@ -57,7 +57,7 @@ public class KeyedAnomalyFlatMap<K,M extends Model, T> extends RichFlatMapFuncti
     @Override
     public void flatMap(Tuple3<K,Tuple4<Double,Double,Long,Long>, T> sample, Collector<Tuple3<K,AnomalyResult, T>> collector) throws Exception {
         M model = microModel.value();
-        AnomalyResult res  = model.calculateAnomaly(sample.f1);
+        AnomalyResult res  = model.calculateAnomaly(sample.f1, threshold);
 
         if ( res.getScore() <= threshold || updateIfAnomaly){
             model.addWindow(sample.f1);

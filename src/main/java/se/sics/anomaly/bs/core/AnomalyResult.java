@@ -18,25 +18,37 @@ package se.sics.anomaly.bs.core;
  * limitations under the License.
  */
 
-public class AnomalyResult {
+import se.sics.anomaly.bs.history.HistoryValue;
+
+public class AnomalyResult<H extends HistoryValue> {
     private double score;
+    private double cutoff;
     private long sTime;
     private long eTime;
+    private H window;
+    private H history;
 
 
-    public AnomalyResult(double score, long sTime, long eTime){
-        this.score=score;
+    public AnomalyResult(double score, long sTime, long eTime, double cutoff, H window, H history){
+        this.score = score;
         this.sTime = sTime;
         this.eTime = eTime;
+        this.cutoff = cutoff;
+        this.window = window;
+        this.history = history;
     }
 
     public double getScore(){ return score; }
+    public boolean isAnomaly(){ return score > cutoff; }
+    public H getWindow(){ return window; }
+    public H getHistory(){ return history; }
 
     public long getStartTime(){return sTime;}
     public long getEndTime(){return eTime;}
 
     @Override
     public String toString() {
-        return (Double.toString(score) + " "+ Long.toString(getStartTime())+ " "+ Long.toString(getEndTime()));
+        //return "";
+        return (Double.toString(score) +" "+ cutoff + " "+ Long.toString(getStartTime())+ " "+ Long.toString(getEndTime())+ " "+window + " "+history);
     }
 }

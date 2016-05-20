@@ -29,7 +29,7 @@ import java.io.Serializable;
  * Created by mneumann on 2016-04-21.
  */
 public abstract class Model implements Serializable {
-    public abstract AnomalyResult calculateAnomaly(Tuple4<Double,Double,Long,Long> v) ;
+    public abstract AnomalyResult calculateAnomaly(Tuple4<Double,Double,Long,Long> v, double threshold) ;
     public abstract void addWindow(Tuple4<Double,Double,Long,Long> v);
     public abstract TypeInformation getTypeInfo();
 }

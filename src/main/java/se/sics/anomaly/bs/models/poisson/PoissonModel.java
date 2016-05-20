@@ -95,12 +95,16 @@ public class PoissonModel extends Model implements Serializable {
     }
 
     @Override
-    public AnomalyResult calculateAnomaly(Tuple4<Double,Double,Long,Long> v) {
+    public AnomalyResult calculateAnomaly(Tuple4<Double,Double,Long,Long> v, double threshold) {
+        PoissonHValue w = new PoissonHValue();
+        w.f0 = v.f0;
+        w.f1= v.f1;
+
         PoissonHValue h = (PoissonHValue) hist.getHistory();
         if (h == null){
-            return new AnomalyResult(-1,v.f2,v.f3);
+            return new AnomalyResult(-1,v.f2,v.f3,threshold,w,h);
         }
-        return new AnomalyResult(calculateAnomaly(v.f0,v.f1,h.f0,h.f1),v.f2,v.f3);
+        return new AnomalyResult(calculateAnomaly(v.f0,v.f1,h.f0,h.f1),v.f2,v.f3,threshold,w,h);
     }
 
     @Override

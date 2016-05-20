@@ -90,16 +90,21 @@ public class NormalModel extends Model implements Serializable {
     }
 
     @Override
-    public AnomalyResult calculateAnomaly(Tuple4<Double,Double,Long,Long> v) {
+    public AnomalyResult calculateAnomaly(Tuple4<Double,Double,Long,Long> v, double threshold) {
+        NormalHValue w =new NormalHValue();
+        w.f0 = 1d;
+        w.f1 = v.f1;
+        w.f2 = v.f0 * v.f1;
+        w.f3 = v.f0 * v.f0 * v.f1 ;
+
         NormalHValue h = (NormalHValue) hist.getHistory();
         if (h == null) {
-            return new AnomalyResult(-1,v.f2,v.f3);
+            return new AnomalyResult(-1,v.f2,v.f3,threshold,w,h);
         }
         double mean = h.f2/h.f1;
         double scale = h.f3-h.f2*h.f2/h.f1;
         double cc = h.f0 * 0.5;
-
-        return new AnomalyResult(calculateAnomaly(v.f0, cc, mean  , (h.f1+v.f1)/(h.f1*v.f1)*scale),v.f2,v.f3);
+        return new AnomalyResult(calculateAnomaly(v.f0, cc, mean  , (h.f1+v.f1)/(h.f1*v.f1)*scale),v.f2,v.f3,threshold,w,h);
     }
 
     @Override
