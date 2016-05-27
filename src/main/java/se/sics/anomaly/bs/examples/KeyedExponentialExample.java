@@ -38,25 +38,29 @@ public class KeyedExponentialExample {
     public static void main(String[] args) throws Exception {
 
         // set up the execution environment
-        final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        final StreamExecutionEnvironment env
+                = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setStreamTimeCharacteristic(TimeCharacteristic.IngestionTime);
 
         // generate stream
-        DataStream<Tuple2<String,Double>> inStream = env.addSource(new ExponentialGenerator());
+        DataStream<Tuple2<String,Double>> inStream
+                = env.addSource(new ExponentialGenerator());
 
         // Choose and a History defining what the latest window will be compared to. In this case each new window will be compared to the aggregation of the last two windows.
-        History hist = new HistoryTrailing(2);
+        History hist
+                = new HistoryTrailing(2);
         // Choose a distribution the value is supposed to follow and initialize it with a history.
-        ExponentialValueAnomaly<String,Tuple2<String,Double>,NullValue> anomalyDetector = new ExponentialValueAnomaly<String, Tuple2<String, Double>, NullValue>(hist);
+        ExponentialValueAnomaly<String,Tuple2<String,Double>,NullValue> anomalyDetector
+                = new ExponentialValueAnomaly<String, Tuple2<String, Double>, NullValue>(hist);
 
         // feed the stream into the model and get back a stream of AnomalyResults. For details see the different internal classes defined below.
-        DataStream<Tuple3<String,AnomalyResult,NullValue>> result = anomalyDetector.getAnomalySteam(inStream,new KExtract(),new VExtract(),new RVFold(),Time.seconds(10));
+        DataStream<Tuple3<String,AnomalyResult,NullValue>> result
+                = anomalyDetector.getAnomalySteam(inStream,new KExtract(),new VExtract(),new RVFold(),Time.seconds(10));
 
         // print the result
         result.print();
 
         env.execute("Simple Exponential Example Keyed");
-
     }
 
     // Simple extractor function that pulls the key out of the input pojo

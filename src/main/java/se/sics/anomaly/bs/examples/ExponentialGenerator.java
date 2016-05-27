@@ -11,7 +11,6 @@ import java.util.Random;
 public class ExponentialGenerator implements SourceFunction<Tuple2<String,Double>> {
 
         private double lambda1 = 10d;
-        private double lambda2 = 100d;
         private volatile Random rnd = new Random();
         private volatile boolean isRunning = true;
         private volatile boolean anomaly = false;
@@ -26,11 +25,11 @@ public class ExponentialGenerator implements SourceFunction<Tuple2<String,Double
                 Thread.sleep(1000);
                 if(!anomaly){
                     sourceContext.collect(new Tuple2<>("key1", getNext(lambda1)));
-                    sourceContext.collect(new Tuple2<>("key2", getNext(lambda1)));
+                    //sourceContext.collect(new Tuple2<>("key2", getNext(lambda1)));
                     if(rnd.nextInt(40)<1)anomaly = true;
                 }else{
-                    sourceContext.collect(new Tuple2<>("key1", getNext(lambda2)));
-                    sourceContext.collect(new Tuple2<>("key2", getNext(lambda2)));
+                    sourceContext.collect(new Tuple2<>("key1", getNext(lambda1)*20));
+                    //sourceContext.collect(new Tuple2<>("key2", getNext(lambda1)*20));
                     if(rnd.nextInt(10)<1)anomaly = false;
                 }
             }
