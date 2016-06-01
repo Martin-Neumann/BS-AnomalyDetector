@@ -22,7 +22,7 @@ Limitations:
 In order to use this approach the data needs to fulfill the following requirements:
 
 1. The approach can be used for float values or for inter arrival time of events
-2. *The values observed need to be normal, lognormal, exponential or poisson distributed*
+2. **The values observed need to be normal, lognormal, exponential or poisson distributed**
 3. The shape of the distribution can change but not the type. For example you cannot switch from normal to exponential at runtime.
 4. If data with timestamps is used there needs to be a limit on how much out of order the events can be.
 
