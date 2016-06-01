@@ -27,7 +27,7 @@ In order to use this approach the data needs to fulfill the following requiremen
 4. If data with timestamps is used there needs to be a limit on how much out of order the events can be.
 
 ## How to use it
-You need to find out what distribution the values follow before you can setup a pipeline. Then create a Flink streaming job or modify *KeyedExponentialExample.java*. First configure the Flink environment and set fault tolerance and timestamps if needed. Connect a source to get the input stream.
+You need to find out what distribution the values follow before you can setup a pipeline. Then create a Flink streaming job or modify **KeyedExponentialExample.java**. First configure the Flink environment and set fault tolerance and timestamps if needed. Connect a source to get the input stream.
 
 Choose and configure a history. 
 There are currently two types of History available. HistoryTrailing contains the last n windows and takes n as variable in the constructor. Space complexity of this model grows liniar with n.
