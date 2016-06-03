@@ -22,17 +22,13 @@ import org.apache.flink.api.java.tuple.*;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.types.NullValue;
 import se.sics.anomaly.bs.core.AnomalyResult;
 import se.sics.anomaly.bs.core.PayloadFold;
 import se.sics.anomaly.bs.history.History;
-import se.sics.anomaly.bs.history.HistoryRolling;
 import se.sics.anomaly.bs.history.HistoryTrailing;
 import se.sics.anomaly.bs.models.exponential.ExponentialValueAnomaly;
-
-import java.util.Random;
 
 public class KeyedExponentialExample {
     public static void main(String[] args) throws Exception {

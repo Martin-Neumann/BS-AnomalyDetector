@@ -21,7 +21,7 @@ package se.sics.anomaly.bs.history;
 
 import java.util.ArrayList;
 
-public class HistoryRolling implements History {
+public class HistoryPeriodic implements History {
 
 
     private ArrayList<HistoryValue> rollingHistory;
@@ -33,7 +33,7 @@ public class HistoryRolling implements History {
     private int currPos;
     private int rep;
 
-    public HistoryRolling(int numSegment, int shiftPos, int shiftNeg,int rep){
+    public HistoryPeriodic(int numSegment, int shiftPos, int shiftNeg, int rep){
         this.numSegment = numSegment;
         this.rollingHistory = new ArrayList<>(numSegment*rep);
         this.shiftNeg = shiftNeg;
@@ -45,8 +45,8 @@ public class HistoryRolling implements History {
             rollingHistory.add(null);
         }
     }
-    public HistoryRolling(int numSegment, int shiftPos, int shiftNeg){
-        new HistoryRolling(numSegment,shiftPos,shiftNeg,1);
+    public HistoryPeriodic(int numSegment, int shiftPos, int shiftNeg){
+        new HistoryPeriodic(numSegment,shiftPos,shiftNeg,1);
     }
 
     @Override
