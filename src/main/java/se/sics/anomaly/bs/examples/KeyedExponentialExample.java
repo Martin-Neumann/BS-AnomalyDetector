@@ -46,12 +46,12 @@ public class KeyedExponentialExample {
         History hist
                 = new HistoryTrailing(2);
         // Choose a distribution the value is supposed to follow and initialize it with a history.
-        ExponentialValueAnomaly<String,Tuple2<String,Double>,NullValue> anomalyDetector
-                = new ExponentialValueAnomaly<String, Tuple2<String, Double>, NullValue>(hist);
+        ExponentialValueAnomaly<String,Tuple2<String,Double>> anomalyDetector
+                = new ExponentialValueAnomaly<String, Tuple2<String, Double>>(hist);
 
         // feed the stream into the model and get back a stream of AnomalyResults. For details see the different internal classes defined below.
-        DataStream<Tuple3<String,AnomalyResult,NullValue>> result
-                = anomalyDetector.getAnomalySteam(inStream,new KExtract(),new VExtract(),new RVFold(),Time.seconds(10));
+        DataStream<Tuple2<String,AnomalyResult>> result
+                = anomalyDetector.getAnomalySteam(inStream,new KExtract(),new VExtract(),Time.seconds(10));
 
         // print the result
         result.print();
@@ -74,20 +74,4 @@ public class KeyedExponentialExample {
             return t.f1;
         }
     }
-
-    // User defined fold function. Use this to enrich the return from the model with metadata e.g. start and end timestamp.
-    private static class RVFold implements PayloadFold<Tuple2<String,Double>,NullValue>{
-        @Override
-        public NullValue fold(Tuple2<String, Double> in, NullValue out) {
-            return NullValue.getInstance();
-        }
-
-        @Override
-        public NullValue getInit() {
-            return NullValue.getInstance();
-        }
-    }
-
-
-
 }

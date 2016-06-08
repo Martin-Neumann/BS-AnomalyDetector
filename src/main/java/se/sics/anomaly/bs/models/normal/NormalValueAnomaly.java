@@ -24,8 +24,8 @@ import se.sics.anomaly.bs.models.CountSumFold;
 /**
  * Created by mneumann on 2016-04-27.
  */
-public class NormalValueAnomaly<K,V,RV> {
-    private KeyedAnomalyFlatMap<K,NormalModel,RV> afm;
+public class NormalValueAnomaly<K,V> {
+    private KeyedAnomalyFlatMap<K,NormalModel> afm;
 
     public NormalValueAnomaly(boolean addIfAnomaly, double anomalyLevel, History hist){
         this.afm = new KeyedAnomalyFlatMap<>(14d,new NormalModel(hist), true);
@@ -35,32 +35,21 @@ public class NormalValueAnomaly<K,V,RV> {
         new NormalValueAnomaly(false,14d,hist);
     }
 
-    public DataStream<Tuple3<K, AnomalyResult, RV>> getAnomalySteam(DataStream<V> ds, KeySelector<V, K> keySelector , KeySelector<V,Double> valueSelector, PayloadFold<V, RV> valueFold, Time window) {
+    public DataStream<Tuple2<K, AnomalyResult>> getAnomalySteam(DataStream<V> ds, KeySelector<V, K> keySelector , KeySelector<V,Double> valueSelector, Time window) {
 
         KeyedStream<V, K> keyedInput = ds
                 .keyBy(keySelector);
 
-        TypeInformation<Object> foldResultType = TypeExtractor.getUnaryOperatorReturnType(valueFold,
-                PayloadFold.class,
-                false,
-                false,
-                ds.getType(),
-                "PayloadFold",
-                false);
-
-         TypeInformation<Tuple3<K,Tuple4<Double,Double,Long,Long>,RV>> resultType = (TypeInformation) new TupleTypeInfo<>(Tuple3.class,
+         TypeInformation<Tuple2<K,Tuple4<Double,Double,Long,Long>>> resultType = (TypeInformation) new TupleTypeInfo<>(Tuple3.class,
                 new TypeInformation[] {keyedInput.getKeyType(), new TupleTypeInfo(Tuple4.class,
-                        BasicTypeInfo.DOUBLE_TYPE_INFO, BasicTypeInfo.DOUBLE_TYPE_INFO, BasicTypeInfo.LONG_TYPE_INFO,BasicTypeInfo.LONG_TYPE_INFO), foldResultType});
+                        BasicTypeInfo.DOUBLE_TYPE_INFO, BasicTypeInfo.DOUBLE_TYPE_INFO, BasicTypeInfo.LONG_TYPE_INFO,BasicTypeInfo.LONG_TYPE_INFO)});
 
-        Tuple3<K,Tuple4<Double,Double,Long,Long>, RV> init= new Tuple3<>(null,new Tuple4<>(0d,0d,0l,0l), valueFold.getInit());
-        KeyedStream<Tuple3<K,Tuple4<Double,Double,Long,Long>,RV>, Tuple> kPreStream = keyedInput
+        Tuple2<K,Tuple4<Double,Double,Long,Long>> init= new Tuple2<>(null,new Tuple4<>(0d,0d,0l,0l));
+        KeyedStream<Tuple2<K,Tuple4<Double,Double,Long,Long>>, Tuple> kPreStream = keyedInput
                 .timeWindow(window)
-                .apply(init, new CountSumFold<>(keySelector, valueSelector, valueFold, resultType), new WindowTimeExtractor(resultType))
+                .apply(init, new CountSumFold<>(keySelector, valueSelector, resultType), new WindowTimeExtractor(resultType))
                 .keyBy(0);
 
         return kPreStream.flatMap(afm);
     }
-
-
-
 }

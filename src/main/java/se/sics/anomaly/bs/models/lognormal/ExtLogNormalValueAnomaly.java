@@ -1,11 +1,9 @@
 package se.sics.anomaly.bs.models.lognormal;
 
-import org.apache.flink.api.common.functions.FoldFunction;
 import org.apache.flink.api.common.typeinfo.BasicTypeInfo;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.api.java.tuple.Tuple;
-import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.tuple.Tuple4;
 import org.apache.flink.api.java.typeutils.TupleTypeInfo;
@@ -15,23 +13,21 @@ import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import se.sics.anomaly.bs.core.*;
 import se.sics.anomaly.bs.history.History;
-import se.sics.anomaly.bs.models.CountSumFold;
 import se.sics.anomaly.bs.models.normal.NormalModel;
-import se.sics.anomaly.bs.models.poisson.PoissonModel;
 
 /**
  * Created by mneumann on 2016-04-27.
  */
-public class LogNormalValueAnomaly<K,V,RV> {
+public class ExtLogNormalValueAnomaly<K,V,RV> {
 
     private ExtKeyedAnomalyFlatMap<K,NormalModel,RV> afm;
 
-    public LogNormalValueAnomaly(boolean addIfAnomaly, double anomalyLevel, History hist){
+    public ExtLogNormalValueAnomaly(boolean addIfAnomaly, double anomalyLevel, History hist){
         this.afm = new ExtKeyedAnomalyFlatMap<>(14d,new NormalModel(hist), true);
     }
 
-    public LogNormalValueAnomaly(History hist){
-        new LogNormalValueAnomaly(false,14d,hist);
+    public ExtLogNormalValueAnomaly(History hist){
+        new ExtLogNormalValueAnomaly(false,14d,hist);
     }
     public DataStream<Tuple3<K, AnomalyResult, RV>> getAnomalySteam(DataStream<V> ds, KeySelector<V, K> keySelector, KeySelector<V,Double> valueSelector, PayloadFold<V, RV> valueFold, Time window) {
 
@@ -53,7 +49,7 @@ public class LogNormalValueAnomaly<K,V,RV> {
         Tuple3<K,Tuple4<Double,Double,Long,Long>, RV> init= new Tuple3<>(null,new Tuple4<>(0d,0d,0l,0l), valueFold.getInit());
         KeyedStream<Tuple3<K,Tuple4<Double,Double,Long,Long>,RV>, Tuple> kPreStream = keyedInput
                 .timeWindow(window)
-                .apply(init, new ExtLogCountSumFold<>(keySelector,valueSelector,valueFold, resultType),new ExtWindowTimeExtractor(resultType))
+                .apply(init, new LogCountSumFold<>(keySelector,valueSelector,valueFold, resultType),new ExtWindowTimeExtractor(resultType))
                 .keyBy(0);
 
         return kPreStream.flatMap(afm);

@@ -13,23 +13,23 @@ import org.apache.flink.util.Collector;
 /**
  * Created by mneumann on 2016-05-12.
  */
-public class WindowTimeExtractor<K,RV> implements WindowFunction<Tuple3<K,Tuple4<Double,Double,Long,Long>, RV>,Tuple3<K,Tuple4<Double,Double,Long,Long>, RV>,K,TimeWindow> ,ResultTypeQueryable<Tuple3<K,Tuple4<Double,Double,Long,Long>, RV>> {
-    private transient TypeInformation<Tuple3<K,Tuple4<Double,Double,Long,Long>, RV>> resultType;
+public class WindowTimeExtractor<K> implements WindowFunction<Tuple2<K,Tuple4<Double,Double,Long,Long>>,Tuple2<K,Tuple4<Double,Double,Long,Long>>,K,TimeWindow> ,ResultTypeQueryable<Tuple2<K,Tuple4<Double,Double,Long,Long>>> {
+    private transient TypeInformation<Tuple2<K,Tuple4<Double,Double,Long,Long>>> resultType;
 
-    public WindowTimeExtractor (TypeInformation<Tuple3<K, Tuple4<Double, Double,Long,Long>, RV>> resultType){
+    public WindowTimeExtractor (TypeInformation<Tuple2<K, Tuple4<Double, Double,Long,Long>>> resultType){
         this.resultType = resultType;
     }
 
     @Override
-    public void apply(K key, TimeWindow timeWindow, Iterable<Tuple3<K, Tuple4<Double, Double,Long,Long>, RV>> iterable, Collector<Tuple3<K, Tuple4<Double, Double, Long, Long>, RV>> collector) throws Exception {
-        Tuple3<K,Tuple4<Double,Double,Long,Long>, RV> out = iterable.iterator().next();
+    public void apply(K key, TimeWindow timeWindow, Iterable<Tuple2<K, Tuple4<Double, Double,Long,Long>>> iterable, Collector<Tuple2<K, Tuple4<Double, Double, Long, Long>>> collector) throws Exception {
+        Tuple2<K,Tuple4<Double,Double,Long,Long>> out = iterable.iterator().next();
         out.f1.f2 = timeWindow.getStart();
         out.f1.f3 = timeWindow.getEnd();
         collector.collect(out);
     }
 
     @Override
-    public TypeInformation<Tuple3<K, Tuple4<Double, Double,Long,Long>, RV>> getProducedType() {
+    public TypeInformation<Tuple2<K, Tuple4<Double, Double,Long,Long>>> getProducedType() {
         return resultType;
     }
 }
