@@ -49,7 +49,7 @@ public class ExtLogNormalValueAnomaly<K,V,RV> {
         Tuple3<K,Tuple4<Double,Double,Long,Long>, RV> init= new Tuple3<>(null,new Tuple4<>(0d,0d,0l,0l), valueFold.getInit());
         KeyedStream<Tuple3<K,Tuple4<Double,Double,Long,Long>,RV>, Tuple> kPreStream = keyedInput
                 .timeWindow(window)
-                .apply(init, new LogCountSumFold<>(keySelector,valueSelector,valueFold, resultType),new ExtWindowTimeExtractor(resultType))
+                .apply(init, new ExtLogCountSumFold<>(keySelector,valueSelector,valueFold, resultType),new ExtWindowTimeExtractor(resultType))
                 .keyBy(0);
 
         return kPreStream.flatMap(afm);

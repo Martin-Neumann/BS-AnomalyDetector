@@ -39,7 +39,7 @@ public class NormalFreqAnomaly<K,V> {
         KeyedStream<V, K> keyedInput = ds
                 .keyBy(keySelector);
 
-         TypeInformation<Tuple2<K,Tuple4<Double,Double,Long,Long>>> resultType = (TypeInformation) new TupleTypeInfo<>(Tuple3.class,
+         TypeInformation<Tuple2<K,Tuple4<Double,Double,Long,Long>>> resultType = (TypeInformation) new TupleTypeInfo<>(Tuple2.class,
                 new TypeInformation[] {keyedInput.getKeyType(), new TupleTypeInfo(Tuple4.class,
                         BasicTypeInfo.DOUBLE_TYPE_INFO, BasicTypeInfo.DOUBLE_TYPE_INFO, BasicTypeInfo.LONG_TYPE_INFO,BasicTypeInfo.LONG_TYPE_INFO)});
 
